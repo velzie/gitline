@@ -1,0 +1,15 @@
+{
+  "name": "gitline",
+  "version": "1.0.0",
+  "description": "git tracker eyecandy",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^17.0.0"
+  }
+}
