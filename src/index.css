@@ -48,6 +48,19 @@ body {
   display: none;
   width: 0px !important;
 }
+.page-title {
+  background-color: var(--m-l2);
+  width: 100%;
+  height: 30px;
+  color: var(--m-text-color);
+  font-family: monospace;
+  font-size: large;
+  display: flex;
+  position: sticky;
+  justify-content: center;
+  align-items: center;
+}
+
 pre {
   padding: 15px;
 }

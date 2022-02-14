@@ -6,42 +6,62 @@ const ipc = require("electron").ipcMain;
 
 const util = require("util");
 
-const acmd = util.promisify(exec); // (cmd) => new Promise((r) => exec(cmd, r));
+var gitindex = 0;
 const cmd = (cmd) => {
   return new Promise((r) => {
-    exec(cmd, (err, stdout, stderr) => {
-      r(stdout);
-    });
+    exec(
+      cmd,
+      {
+        encoding: "utf8",
+        timeout: 0,
+        maxBuffer: 20000 * 1024,
+        killSignal: "SIGTERM",
+        cwd: null,
+        env: null,
+      },
+      (err, stdout, stderr) => {
+        if (err != null) {
+          console.error(err);
+        }
+        if (stderr != null) {
+          console.error(stderr);
+        }
+        r(stdout);
+      }
+    );
   });
 };
 
 var mainWindow;
 function createWindow() {
   // Create the browser window.
-  Git.getCommits();
-  // mainWindow = new BrowserWindow({
-  //   width: 1050,
-  //   height: 700,
-  //   webPreferences: {
-  //     preload: path.join(__dirname, "src/preload.js"),
-  //     nodeIntegration: true,
-  //     enableRemoteModule: true,
-  //   },
-  // });
-  // mainWindow.loadFile("src/index.html");
-  // //   ipc.on("makesave", () => {
-  // //     console.log("making save");
-  // //   });
-  // mainWindow.setFullScreen(true);
+
+  mainWindow = new BrowserWindow({
+    width: 1050,
+    height: 700,
+    webPreferences: {
+      preload: path.join(__dirname, "src/preload.js"),
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+  });
+  mainWindow.loadFile("src/index.html");
+  //   ipc.on("makesave", () => {
+  //     console.log("making save");
+  //   });
+  mainWindow.setFullScreen(true);
 }
 
 app.whenReady().then(() => {
-  // ipcMain.on("git", (res, req) => {
-  //   console.log(req);
-  //   Git.log((stdout) => {
-  //     mainWindow.webContents.send("git", { type: "commit", data: stdout });
-  //   });
-  // });
+  ipcMain.on("git", (res, req) => {
+    console.log(req);
+    Git.getCommits().then((e) => {
+      Git.getDiff(e[gitindex].id, e[gitindex + 1].id).then((e2) => {
+        mainWindow.webContents.send("git", { type: "commit", data: e2 });
+        gitindex++;
+      });
+    });
+  });
   createWindow();
 });
 
@@ -54,7 +74,50 @@ const Git = {
     return cmd("git log");
   },
   getDiff: async (id, id2) => {
-    return cmd(id + ".." + id2);
+    let result = []; //[{remove:false,code:"kdasjdkla.aksdl();"}]
+
+    let rawdiff = await cmd("git diff " + id + ".." + id2);
+
+    let difflines = rawdiff.split("\n");
+
+    let sectionname = "null";
+
+    let buffer = [];
+
+    for (let i = 0; i < difflines.length; i++) {
+      let line = difflines[i];
+      switch (line[0]) {
+        case " ":
+        //fallthrough indended. super cursed tho
+        case "+":
+          if (line[1] != "+") {
+            buffer.push({ sign: true, code: line.substring(1, line.length) });
+          } else {
+            result.push({
+              file: sectionname,
+              code: buffer,
+            });
+            sectionname = line.substring(6, line.length);
+            buffer = [];
+          }
+          break;
+        case "-":
+          if (line[1] != "-") {
+            buffer.push({ sign: false, code: line.substring(1, line.length) });
+          }
+          break;
+      }
+    }
+
+    result.shift();
+    result.forEach((r) => {
+      if (r.file[0] == "." || r.file.includes("package-lock")) {
+        result = result.filter((i) => {
+          return i != r;
+        });
+      }
+    });
+    return result.reverse();
   },
   getCommits: async () => {
     let result = []; // wanted format : [{id:1hjkhdaiut817egdbvjhSb,author:coolelectronics,date:"idk",message:"hi"}]
