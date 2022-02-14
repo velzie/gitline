@@ -1,6 +1,6 @@
 # Gitline
 
-a simple (possibly cross platform) electron application that shows a timeline of all git commits in a project in a cool UI that shows you all the progress you made.
+a simple (possibly cross platform) electron application that shows a timeline of all git commits in a project in a cool UI that shows you a timelapse the progress you made.
 
 # Installation
 
@@ -15,8 +15,10 @@ to be implemented
 
 # Build Instructions
 
+```
 git clone https://github.com/CoolElectronics/gitline
 cd gitline
 npm install --save-dev electron-packager
 npm install
 npx electron-packager . gitline --platform=<platform> --arch=x86_64
+```

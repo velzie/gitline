@@ -56,10 +56,17 @@ app.whenReady().then(() => {
   ipcMain.on("git", (res, req) => {
     console.log(req);
     Git.getCommits().then((e) => {
-      Git.getDiff(e[gitindex].id, e[gitindex + 1].id).then((e2) => {
-        mainWindow.webContents.send("git", { type: "commit", data: e2 });
-        gitindex++;
-      });
+      if (e[gitindex + 1] != null) {
+        Git.getDiff(e[gitindex].id, e[gitindex + 1].id).then((e2) => {
+          mainWindow.webContents.send("git", {
+            type: "commit",
+            data: e2,
+            author: e[gitindex + 1].author,
+            message: e[gitindex + 1].message,
+          });
+          gitindex++;
+        });
+      }
     });
   });
   createWindow();

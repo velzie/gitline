@@ -4,7 +4,7 @@ const delay = async (millis) => new Promise((r) => setTimeout(r, millis));
 var plainspeed = 15;
 var highspeed = 30;
 var linespeed = 100;
-var speedmulti = 2;
+var speedmulti = 1;
 var destroyDelay = 2000;
 
 var containersperline = 3;
@@ -14,12 +14,48 @@ var containers = [];
 var cdata;
 var cindex = 0;
 $(document).ready(() => {
+  let infobox = $("#infobox");
+
+  $(window).keypress((e) => {
+    switch (e.keyCode) {
+      case 32:
+        speedmulti = 0.1;
+        break;
+      case 92:
+        speedmulti = 2;
+        destroyDelay = 1000;
+        break;
+    }
+  });
+  $(window).keyup((e) => {
+    console.log(e.keyCode);
+    switch (e.keyCode) {
+      case 32:
+        speedmulti = 1;
+        break;
+      case 220:
+        console.log("????");
+        speedmulti = 1;
+        destroyDelay = 2000;
+        break;
+    }
+  });
+
   window.api.ipcd.send("git", { type: "fetch" });
 
   window.api.ongit((res, req) => {
-    console.log(req);
+    // console.log(req);
+    console.log("git sent. " + req.message);
     cdata = req.data;
-    nextCode();
+
+    infobox.removeClass("hidden");
+    $(infobox.children()[0]).text(req.message);
+    $(infobox.children()[1]).text("Author: " + req.author);
+
+    setTimeout(() => {
+      infobox.addClass("hidden");
+      nextCode();
+    }, destroyDelay);
   });
 });
 
@@ -35,6 +71,7 @@ function nextCode() {
   }
   if (containers.length == 0) {
     window.api.ipcd.send("git", { type: "fetch" });
+    cindex = 0;
   }
 }
 
@@ -47,7 +84,7 @@ class CodeContainer {
       reparsedcode += element.code + "\n";
     });
     this.code = parseDOM(hljs.highlightAuto(reparsedcode).value);
-    console.log(this.code);
+    // console.log(this.code);
     this.fullRender(this.code);
   }
   appendContainer() {
@@ -71,8 +108,12 @@ class CodeContainer {
     let codeblock = this.container.children().children();
     while (i < code.length) {
       let c = code[i];
-      await delay(linespeed / speedmulti);
-      if (plainspeed != 0) {
+      if (speedmulti != 2) {
+        await delay(linespeed * speedmulti);
+      } else {
+        await delay(10);
+      }
+      if (speedmulti != 2) {
         let strindex = 0;
         while (strindex < c.plaintext.length) {
           let char = c.plaintext[strindex];
@@ -91,13 +132,13 @@ class CodeContainer {
             codeblock.append(char);
             strindex++;
           }
-          await delay(plainspeed / speedmulti);
+          await delay(plainspeed * speedmulti);
         }
       } else {
         codeblock.append(c.plaintext);
       }
 
-      if (highspeed != 0) {
+      if (speedmulti != 2) {
         let cblock = $(c.start);
         codeblock.append(cblock);
         let strindex = 0;
@@ -118,7 +159,7 @@ class CodeContainer {
             cblock.append(char);
             strindex++;
           }
-          await delay(highspeed / speedmulti);
+          await delay(highspeed * speedmulti);
         }
       } else {
         codeblock.append(c.start + c.content + c.end);
@@ -128,7 +169,7 @@ class CodeContainer {
       i++;
     }
     // this.container.css("background-color", "crimson");
-    setTimeout(() => this.destroy(), destroyDelay);
+    setTimeout(() => this.destroy(), destroyDelay * speedmulti);
   }
   destroy() {
     containers = containers.filter((f) => {
@@ -155,10 +196,6 @@ function parseDOM(string) {
 
   while (currentindex < string.length) {
     let char = string[currentindex];
-    // console.log(blockstate);
-    // console.log(state);
-    // console.log(buffer);
-    // console.log(char);
     switch (state) {
       case "global":
         if (char == "<") {

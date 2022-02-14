@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "Source Sans";
+  src: url("lib/Source_Sans_Pro/SourceSansPro-Black.ttf");
+}
 :root {
   /* COLORS */
   --m-main-bg: #1a1826;
@@ -15,6 +19,24 @@
   --teal: #b5e8e0;
   --blue: #96cdfb;
   --sky: #89dceb;
+
+  --black0_hsl: 254, 25%, 10%;
+  --black1_hsl: 249, 23%, 12%;
+  --black2_hsl: 240, 21%, 15%;
+  --black3_hsl: 249, 18%, 22%;
+  --black4_hsl: 254, 12%, 36%;
+  --gray0_hsl: 247, 8%, 46%;
+  --gray1_hsl: 274, 11%, 59%;
+  --gray2_hsl: 285, 10%, 75%;
+  --white_hsl: 220, 38%, 89%;
+  --black0: hsl(var(--black0_hsl));
+  --black1: hsl(var(--black1_hsl));
+  --black2: hsl(var(--black2_hsl));
+  --black3: hsl(var(--black3_hsl));
+  --black4: hsl(var(--black4_hsl));
+  --gray0: hsl(var(--gray0_hsl));
+  --gray1: hsl(var(--gray1_hsl));
+  --gray2: hsl(var(--gray2_hsl));
 
   /* CONSTANTS */
 
@@ -77,4 +99,35 @@ pre {
   /* width: calc(100vw - var(--m-gaps) * 2);
 
   height: calc(100vh - var(--m-gaps) * 2); */
+}
+#infobox {
+  position: absolute;
+  background-color: var(--black2);
+  width: 40vw;
+  height: 30vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.info-title {
+  background-color: var(--m-l2);
+  width: 100%;
+  height: 30px;
+  color: var(--m-text-color);
+  font-family: monospace;
+  font-size: x-large;
+  display: flex;
+  position: sticky;
+  justify-content: center;
+  align-items: center;
+  border-top-right-radius: calc(var(--m-container-radius) - 3px);
+  border-top-left-radius: calc(var(--m-container-radius) - 3px);
+}
+.info-text {
+  font-family: monospace;
+  font-size: large;
+  margin: 10px;
+}
+.hidden {
+  display: none !important;
 }
