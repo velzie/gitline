@@ -4,13 +4,8 @@ const delay = async (millis) => new Promise((r) => setTimeout(r, millis));
 var plainspeed = 15;
 var highspeed = 30;
 var linespeed = 100;
-var speedmulti = 1;
+var speedmulti = 2;
 var destroyDelay = 2000;
-
-plainspeed = 0;
-highspeed = 0;
-linespeed = 0;
-destroyDelay = 0;
 
 var containersperline = 3;
 
